@@ -1,24 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import InputBar from "./components/inputBar/InputBar.component";
+import DisplayList from "./components/display-list/Display-list.component";
+import LoadingScreen from "./components/loading/Loading.component";
 function App() {
+  const [inputText, setInputText] = useState("");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (inputText) {
+      setLoading(true);
+      // console.log(inputText);
+      fetch(
+        `https://mashape-community-urban-dictionary.p.rapidapi.com/define?term=${inputText}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-key":
+              "f7417a1b73msheb6fca689e6a29bp173679jsn907b639f793d",
+            "x-rapidapi-host":
+              "mashape-community-urban-dictionary.p.rapidapi.com",
+          },
+        }
+      )
+        .then((response) => response.json())
+        .then(({ list }) => {
+          // const {newData}=data;
+          // console.log(data)
+          setData(list);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [inputText]);
+  // useEffect(() => {
+  //   console.log(data);
+  // }, [data]);
+  // @ts-ignore
+  const changeHandler = (e) => {
+    setInputText(e);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="container">
+        <InputBar changeHandler={changeHandler} inputText={inputText} />
+        {loading ? <LoadingScreen /> : <DisplayList data={data} />}
+      </div>
     </div>
   );
 }
